@@ -13,6 +13,8 @@ set rtp+=~/.fzf
 
 call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'pseewald/nerdtree-tagbar-combined'
 Plug 'python-mode/python-mode'
 Plug 'tpope/vim-fugitive'
 Plug 'elzr/vim-json'
@@ -37,23 +39,28 @@ Plug 'carakan/new-railscasts-theme'
 "Plug 'morhetz/gruvbox'
 Plug 'junegunn/seoul256.vim'
 Plug 'tweekmonster/nvim-checkhealth'
+Plug 'saltstack/salt-vim'
 "Plug 'davidhalter/jedi-vim'
-"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 "Plug 'zchee/deoplete-jedi'
 
 "Golang stuff
 Plug 'fatih/vim-go'
 Plug 'neovim/go-client'
-
-Plug 'vim-syntastic/syntastic'
 call plug#end()
+
+" Allow saving of files as sudo when I forgot to start vim using sudo.
+cmap w!! w !sudo tee > /dev/null %
 
 "neovim-python
 "let g:python_host_prog = '/home/amalik/.vim/nvim_venv/nvim27/bin/python'
 "let g:python_host_prog = '/home/amalik/.vim/nvim_venv/nvim35/bin/python'
-let g:python_host_prog = '/export/apps/python/2.7/bin/python2.7'
+let g:python_host_prog = '/export/apps/python/2.7/bin/python'
+let g:python3_host_prog = '/export/apps/python/3.5/bin/python3'
 
 
+let g:deoplete#enable_at_startup = 0
+autocmd FileType go  g:deoplete#enable_at_startup = 1
 
 
 "nerdtree
@@ -170,7 +177,7 @@ let g:markdown_fenced_languages = ['html', 'python', 'bash=sh']
 let g:instant_markdown_autostart = 0
 
 
-let g:tagbar_width = 30
+let g:tagbar_width = 50
 let g:tagbar_autofocus = 1
 
 "cursurline highlight
@@ -181,7 +188,7 @@ set cursorline
 
 
 "fzf: List of buffers using fzf, prone to crash tmux
-nnoremap <C-B>  :Buffers<CR>
+nnoremap <leader>b  :Buffers<CR>
 
 
 
@@ -202,7 +209,7 @@ function! s:DiffWithSaved()
 endfunction
 com! DiffSaved call s:DiffWithSaved()
 
-command Diff execute 'w !git diff --no-index % -'
+command Diff execute 'w !git diff  % -'
 nnoremap <leader>d :Diff<CR>
 
 
@@ -282,6 +289,7 @@ endfunction
 command! -bang -complete=buffer -nargs=? Bclose call s:Bclose('<bang>', '<args>')
 nnoremap <silent> <Leader>bd :Bclose<CR>
 nmap <leader>t :TagbarToggle<CR>
+"
 map <C-x>   :Bclose<CR>
 vnoremap . :norm.<CR>
 
@@ -290,10 +298,12 @@ vnoremap . :norm.<CR>
 map <C-T>   :FZF<CR>
 map <M-,>   :Buffers<CR>
 
-" syntastic flake8 check
-let g:syntastic_python_checkers = ['flake8']
-autocmd FileType python nnoremap <leader>fl :SyntasticCheck flake8<Cr>
-
+" map flake8 to F3
+autocmd FileType python map <buffer> <leader>fl :call flake8#Flake8()<CR>
+"autocmd FileType python call SetPythonOptions()
+"function! SetPythonOptions()
+"    :call tagbar#autoopen(0)
+"endfunction
 
 autocmd FileType python nnoremap <leader>y :0,$!yapf<Cr>
 autocmd CompleteDone * pclose " To close preview window of deoplete automagically
@@ -302,6 +312,9 @@ autocmd CompleteDone * pclose " To close preview window of deoplete automagicall
 "lightline colorscheme
 let g:lightline = {
       \ 'colorscheme': 'wombat',
+      \  'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'readonly', 'absolutepath', 'modified' ] ]
+      \ }
       \ }
 
 function! s:DiffWithSaved()
